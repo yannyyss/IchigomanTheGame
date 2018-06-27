@@ -106,9 +106,15 @@ class Gudetama {
         this.gravity = 1.5; //se declara una variable gravedad, con el valor que se retoma más tarde.
     }
     draw() {
-        this.y += this.gravity; //suma el valor de la variable gravedad a y, de esta manera y incrementa cada vez que se dibuja.
-        this.x --; //resta 1 al valor de x, de esta manera, el objeto se dibuja cada vez más hacia la izquierda
-        ctx.drawImage(this.image, this.x, this.y, this.width, this.height); //dibuja la imagen
+        if(this.y < canvas.height-100){
+            this.y += this.gravity; //suma el valor de la variable gravedad a y, de esta manera y incrementa cada vez que se dibuja.
+            this.x--; //resta 1 al valor de x, de esta manera, el objeto se dibuja cada vez más hacia la izquierda
+            ctx.drawImage(this.image, this.x, this.y, this.width, this.height); //dibuja la imagen
+        } else{
+            this.y = canvas.height-100;
+            this.x--;
+            ctx.drawImage(this.image, this.x, this.y, this.width, this.height);
+        }
     }
 }
 
