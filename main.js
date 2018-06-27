@@ -10,6 +10,10 @@ var gudeTamas = []; //array de nuevos gudetamas. Empieza vacío.
 var images = {
     ichigoRun1: '../IchigoGame/images/running1.png',
     ichigoRun2: '../IchigoGame/images/running2.png',
+    ichigoFall: '../IchigoGame/images/fall.png',
+    ichigoJump: '../IchigoGame/images/jumping.png',
+    ichigoPunched: '../IchigoGame/images/punched.png',
+    gojira1: '../IchigoGame/images/gojira1.png',
     bg: '../IchigoGame/images/Background.png' //Es el background del videojuego
 }
 
@@ -71,12 +75,18 @@ class IchigoMan {
         this.image.onload = function () { //cuando se cargue la imagen:
             this.draw(); //ejecuta la función dibujar
         }.bind(this) //hace que la función dibujar comparta el mismo contexto que la que que se declara más adelante la clase, por lo tanto, la puede llamar.
-        //this.gravity = .5; //asigna una variable que se llamará gravedad, la cual se usa más adelante.
+        this.gravity = 1; //asigna una variable que se llamará gravedad, la cual se usa más adelante.
     }
 
     jump() { //arreglar el salto /* */
         this.y -= 50;
-        //this.y += this.gravity; Intenté usar la gravedad para bajar el objeto después del salto, pero aún no funciona
+        this.image.src = images.ichigoJump;
+    }
+    moveRight(){
+        this.x += 50;
+    }
+    moveLeft(){
+        this.x -= 50;
     }
 
     isTouching(item) { 
@@ -87,6 +97,7 @@ class IchigoMan {
     }
 
     draw() { 
+        this.y += this.gravity;
         ctx.drawImage(this.image, this.x, this.y, this.width, this.height); //dibuja la imagen en el canvas.
     }
 
@@ -118,10 +129,29 @@ class Gudetama {
     }
 }
 
+class Gojira {
+    constructor(){
+        this.x = canvas.width;
+        this.y = canvas.height-300;
+        this.width = 250;
+        this.height = 250;
+        this.image = new Image();
+        this.image.src = images.gojira1;
+        this.image.onload = function (){
+            this.draw();
+        }.bind(this);
+    }
+    draw(){
+        this.x--;
+        ctx.drawImage(this.image, this.x, this.y, this.width, this.height);
+    }
+}
+
 //instances
 
 var board = new Board(); /* */ //se crea una instancia para poder ejecutar las clases con sus constructores y funciones.
 var ichigo1 = new IchigoMan();/* */
+var go = new Gojira();
 
 //mainFunctions
 
@@ -130,7 +160,8 @@ function update() {
     ctx.clearRect(0, 0, canvas.width, canvas.height); //limpia el canvas
     board.draw(); //ejecuta la función draw, de la variable board, la cual contiene todo lo que está en la clase Board
     ichigo1.draw(); //ejecuta la función draw, de la variable ichigo1, la cual contiene todo lo que está en la clase IchigoMan
-    
+    go.draw();
+
     imgGudetamaFalling();
     generateGudetamaFalling(); //ejecuta la función generar gudetamas cayendo
     drawGudetamas(); //ejecuta la función dibujar gudetamas que caen
@@ -157,7 +188,8 @@ function imgGudetamaPushed() { //imagen random para gudetama tocado en el piso
 function generateGudetamaFalling() {
 
     if(frames % 100 === 0){ //Genera Gudetamas cada cierto tiempo, en este caso de 100 en 100 frames
-        var x = Math.floor(Math.random() * (canvas.width-200) + canvas.width/2 ); //genera un valor random para que aparezca el nuevo gudetama.
+        //var x = Math.floor(Math.random() * (canvas.width-200) + canvas.width/2 ); //genera un valor random para que aparezca el nuevo gudetama.
+        var x = Math.floor(Math.random() * (canvas.width - 200));
         //la x puede salir desde la mitad de lo que mide el canvas, hasta 100 pixeles antes de su límite de ancho
         var g = new Gudetama(x); //Se crea una nueva instancia para generar gudetamas
         gudeTamas.push(g); //Los nuevos gudetamas se guardan en un array que está declarado como vacío al principio del código.
@@ -190,12 +222,24 @@ function restart() {
 
 //listeners
 addEventListener('keydown', function (e) {
-    if (e.keyCode === 32) {
-        ichigo1.jump();
-        sound.play();
-    } else if (e.keyCode === 27) {
-        restart();
+    switch (e.keyCode) {
+        case 32:
+            ichigo1.jump();
+            sound.play();
+            break;
+        case 37:
+            ichigo1.moveLeft();
+            break;
+        case 39:
+            ichigo1.moveRight();
+            break;
+        case 27:
+            restart();
+            break;
+        //case 13:
+          //  start();
+            //break;
     }
-})
+});
 
 start();
