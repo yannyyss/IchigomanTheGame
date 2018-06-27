@@ -79,14 +79,17 @@ class IchigoMan {
     }
 
     jump() { //arreglar el salto /* */
-        this.y -= 50;
+        this.y -= 80;
         this.image.src = images.ichigoJump;
     }
+    moveDown() {
+        this.y += 80; //disminuye y, mueve abajo
+    }
     moveRight(){
-        this.x += 50;
+        this.x += 80; //aumenta x, mueve a la derecha
     }
     moveLeft(){
-        this.x -= 50;
+        this.x -= 80; //disminuye x, mueve a la izquierda
     }
 
     isTouching(item) { 
@@ -115,15 +118,33 @@ class Gudetama {
             this.draw(); //ejecuta la función dibujar
         }.bind(this) //pone el contenido de la función en el mismo contexto que el nivel arriba en el DOM
         this.gravity = 1.5; //se declara una variable gravedad, con el valor que se retoma más tarde.
+        this.randomNumber = 0;
+        this.dontChange = false;
+        this.getRandomNumber();
     }
+
+    getRandomNumber(){
+        //this.image.src = gudetamaIntoTheFloor[Math.floor(Math.random()*gudetamaIntoTheFloor.length)];
+        this.randomNumber = Math.floor(Math.random() * gudetamaIntoTheFloor.length);
+    }
+    checkFloor(){
+        if(this.dontChange) return;
+        if(this.y > canvas.height - 100) {
+            this.image.src = gudetamaIntoTheFloor[this.randomNumber];
+            this.dontChange = true;
+        }
+        //console.log(this.randomNumber);
+    }
+
     draw() {
         if(this.y < canvas.height-100){
             this.y += this.gravity; //suma el valor de la variable gravedad a y, de esta manera y incrementa cada vez que se dibuja.
             this.x--; //resta 1 al valor de x, de esta manera, el objeto se dibuja cada vez más hacia la izquierda
             ctx.drawImage(this.image, this.x, this.y, this.width, this.height); //dibuja la imagen
         } else{
-            this.y = canvas.height-100;
+           // this.y = canvas.height-100;
             this.x--;
+            this.checkFloor();
             ctx.drawImage(this.image, this.x, this.y, this.width, this.height);
         }
     }
@@ -160,7 +181,7 @@ function update() {
     ctx.clearRect(0, 0, canvas.width, canvas.height); //limpia el canvas
     board.draw(); //ejecuta la función draw, de la variable board, la cual contiene todo lo que está en la clase Board
     ichigo1.draw(); //ejecuta la función draw, de la variable ichigo1, la cual contiene todo lo que está en la clase IchigoMan
-    go.draw();
+    //go.draw();
 
     imgGudetamaFalling();
     generateGudetamaFalling(); //ejecuta la función generar gudetamas cayendo
@@ -223,7 +244,7 @@ function restart() {
 //listeners
 addEventListener('keydown', function (e) {
     switch (e.keyCode) {
-        case 32:
+        case 38:
             ichigo1.jump();
             sound.play();
             break;
@@ -232,6 +253,9 @@ addEventListener('keydown', function (e) {
             break;
         case 39:
             ichigo1.moveRight();
+            break;
+        case 40:
+            ichigo1.moveDown();
             break;
         case 27:
             restart();
