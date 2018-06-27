@@ -13,6 +13,10 @@ var images = {
     ichigoFall: '../IchigoGame/images/fall.png',
     ichigoJump: '../IchigoGame/images/jumping.png',
     ichigoPunched: '../IchigoGame/images/punched.png',
+    ichigoDown: '../IchigoGame/images/down.png',
+    ichigoDownLeft: '../IchigoGame/images/downleft.PNG',
+    ichigoDownRight: '../IchigoGame/images/downrigth.png',
+    gameOver: '../IchigoGame/images/gameover.png',
     gojira1: '../IchigoGame/images/gojira1.png',
     bg: '../IchigoGame/images/Background.png' //Es el background del videojuego
 }
@@ -45,12 +49,13 @@ class Board { //Es el background del canvas
         }.bind(this) //pone la variable dray en el mismo contexto de lo que se encuentra en el siguiente nivel del DOM
     }
 
-    gameOver() { //es la función que termina el juego
-        ctx.font = "80px Helvetica"; // asigna un tamaño y una fuente para la siguiente palabra
-        ctx.fillText("Game Over", 20, 100); // muestra un string en la posición indicada
-        ctx.font = "20px Serif"; // estilo del siguiente string
+    gameOverScreen() { //es la función que termina el juego
+        this.image.src = images.gameOver;
+        ctx.drawImage(this.image, this.x, this.y, this.width, this.height);
+        ctx.font = "20px Helvetica"; // estilo del siguiente string
         ctx.fillStyle = 'red'; // color del siguiente string 
-        ctx.fillText("Press 'Esc' to reset", 20, 150); // muestra un stringo en la posición indicada
+        ctx.fillText("Score", 20, 150); // muestra un stringo en la posición indicada
+        ctx.fillText(Math.floor(frames / 60), this.width - 100, 50);
     }
 
     draw() { //es la función que dibuja el background
@@ -58,24 +63,35 @@ class Board { //Es el background del canvas
         if (this.x === -this.width) this.x = 0; // si x es menor que el ancho de la imagen, x cambia su valor a 0
         ctx.drawImage(this.image, this.x, this.y, this.width, this.height); //dibuja la imagen del background en el contexto
         ctx.drawImage(this.image, this.x + this.width, this.y, this.width, this.height); /* */
-        ctx.fillStyle = "white"; //Esto pinta el siguiente elemento marcador
-        ctx.font = '50px Avenir'; //Esto define el tamaño y la letra del marcador
-        ctx.fillText(Math.floor(frames / 60), this.width - 100, 50) //es un texto que cambia con los frames. /* */ No sé que significa en su totalidad.
+        //ctx.fillStyle = "white"; //Esto pinta el siguiente elemento marcador
+        //ctx.font = '50px Avenir'; //Esto define el tamaño y la letra del marcador
+        //ctx.fillText(Math.floor(frames / 60), this.width - 100, 50); //es un texto que cambia con los frames. /* */ No sé que significa en su totalidad.
     }
 }
 
 class IchigoMan {
-    constructor() {
+    constructor(health = 3) {
         this.x = 60; //posición x del elemento en el canvas
         this.y = 220; //posición y del elemento en el canvas
         this.width = 220; //ancho del elemento
         this.height = 250; //alto del elemento
+        this.health = health;
         this.image = new Image(); /**/
         this.image.src = images.ichigoRun1; //ruta de la imagen que está en el objeto images
         this.image.onload = function () { //cuando se cargue la imagen:
             this.draw(); //ejecuta la función dibujar
         }.bind(this) //hace que la función dibujar comparta el mismo contexto que la que que se declara más adelante la clase, por lo tanto, la puede llamar.
         this.gravity = 1; //asigna una variable que se llamará gravedad, la cual se usa más adelante.
+    }
+    receiveDamage(damage) {
+        this.health -= damage;
+        if (this.health > 0) {
+          console.log("Has received " + damage + " points of damage");
+        } else {
+          console.log("Has died");
+          gameOver();
+        }
+        return;
     }
 
     jump() { //arreglar el salto /* */
@@ -84,21 +100,24 @@ class IchigoMan {
     }
     moveDown() {
         this.y += 80; //disminuye y, mueve abajo
+        this.image.src = images.ichigoDown;
     }
     moveRight(){
         this.x += 80; //aumenta x, mueve a la derecha
+        this.image.src = images.ichigoDownRight;
     }
     moveLeft(){
         this.x -= 80; //disminuye x, mueve a la izquierda
+        this.image.src = images.ichigoDownLeft;
     }
-
+    /*
     isTouching(item) { 
         return (this.x < item.x + item.width) &&
             (this.x + this.width > item.x) &&
             (this.y < item.y + item.height) &&
             (this.y + this.height > item.y);
     }
-
+    */
     draw() { 
         this.y += this.gravity;
         ctx.drawImage(this.image, this.x, this.y, this.width, this.height); //dibuja la imagen en el canvas.
@@ -219,22 +238,31 @@ function generateGudetamaFalling() {
 }
 
 function drawGudetamas(){ 
-    gudeTamas.forEach(function(blissTama){ //recorre el array de los gudetamas creados por el método de instancia.
-        blissTama.draw();//toma un elemento del array y lo dibuja.
+    gudeTamas.forEach(function(Tama){ //recorre el array de los gudetamas creados por el método de instancia.
+        Tama.draw();//toma un elemento del array y lo dibuja.
     })
 }
 
-function finishHim() {
+function isTouchingGudetama(ichigo1,tama){
+    if((ichigo1.x < tama.x + tama.width) &&
+    (ichigo1.x + ichigo1.width > tama.x) &&
+    (ichigo1.y < tama.y + tama.height) &&
+    (ichigo1.y + ichigo1.height > tama.y)){
+    ichigo1.receiveDamage(1);
+    }
+}
+
+function gameOver() {
     clearInterval(interval); //detiene la función intervalo
     interval = undefined; /* */
-    board.gameOver(); //ejecuta la función de la variable board que contiene la clase Board
+    board.gameOverScreen(); //ejecuta la función de la variable board que contiene la clase Board
     sound.pause(); //Detiene el sonido
     sound.currentTime = 0; /* */
 }
 
 function restart() {
     if (interval) return;
-    pipes = [];
+    gudeTamas = [];
     frames = 0;
     ichigo1.x = 100;
     ichigo1.y = 100;
