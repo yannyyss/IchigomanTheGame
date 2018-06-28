@@ -4,7 +4,7 @@ var ctx = canvas.getContext('2d'); //genera una variable contexto que sirve como
 //constants
 var interval; 
 var frames = 0; //la variable frames empieza en cero.
-
+var score;
 var gudeTamas = []; //array de nuevos gudetamas. Empieza vacío.
 
 var images = {
@@ -28,12 +28,15 @@ var randomGudetama = '';
 var gudetamaIntoTheFloor = ['../IchigoGame/images/floor1.png','../IchigoGame/images/floor2.png','../IchigoGame/images/floor3.png','../IchigoGame/images/floor4.png','../IchigoGame/images/floor5.png'];
 var gudetamaPushed = ['../IchigoGame/images/pushed1.png','../IchigoGame/images/pushed2.png'];
 
-/* SOUND
-var sound = new Audio();
-sound.src = "http://66.90.93.122/ost/flappy-golf-2/wncucmil/1%20pancakes.mp3";
-sound.loop = true;
-var pipes = [];
-*/
+//Sounds
+
+var inicialSound = new Audio();
+inicialSound.src = "../IchigoGame/sounds/Inicio.mp3";
+inicialSound.loop = true;
+
+var startSound = new Audio();
+startSound.src = '../IchigoGame/sounds/InvincibleKitty.mp3';
+startSound.loop = true;
 
 //class
 
@@ -45,7 +48,8 @@ class Board { //Es el background del canvas
         this.height = canvas.height; //mide el alto del canvas
         this.image = new Image(); /* */
         this.image.src = images.startGame; //selecciona la imágen background que está en el arreglo de images.
-        this.image.onload = function () { // Cuando se carga completamente la imagen:
+        this.image.onload = function () { 
+            // Cuando se carga completamente la imagen:
             this.draw(); //ejecuta la función draw.
         }.bind(this) //pone la variable dray en el mismo contexto de lo que se encuentra en el siguiente nivel del DOM
     }
@@ -59,7 +63,8 @@ class Board { //Es el background del canvas
         this.y = 0;
         this.image.src = images.bg;
     }
-    draw() { //es la función que dibuja el background
+    draw() { 
+        //es la función que dibuja el background
         this.x--; //cada vez que dibuja, resta uno a x.
         if (this.x === -this.width) this.x = 0; // si x es menor que el ancho de la imagen, x cambia su valor a 0
         ctx.drawImage(this.image, this.x, this.y, this.width, this.height); //dibuja la imagen del background en el contexto
@@ -72,17 +77,16 @@ class Board { //Es el background del canvas
         this.x = 0;
         this.y = 0;
         this.image.src = images.gameOver;
-
     }
 }
 
 class IchigoMan {
     constructor() {
         this.x = 60; //posición x del elemento en el canvas
-        this.y = 220; //posición y del elemento en el canvas
+        this.y = 200; //posición y del elemento en el canvas
         this.width = 220; //ancho del elemento
         this.height = 250; //alto del elemento
-        this.health = 1;
+        this.health = 3;
         this.image = new Image(); /**/
         this.image.src = images.ichigoRun1; //ruta de la imagen que está en el objeto images
         this.image.onload = function () { //cuando se cargue la imagen:
@@ -105,24 +109,33 @@ class IchigoMan {
 
     jump() { //arreglar el salto /* */
         this.image.src = images.ichigoJump;
-        if (this.y = 5) return;
-        this.y -= 80;
+        console.log(this.y);
+        if (this.y <= 40) return;
+        this.y -= 50;
     }
     moveDown() {
-        this.y += 80; //disminuye y, mueve abajo
         this.image.src = images.ichigoDown;
+        console.log(this.y);
+        if (this.y > 255) return;
+        this.y += 50; //disminuye y, mueve abajo
     }
     moveRight(){
-        this.x += 80; //aumenta x, mueve a la derecha
         this.image.src = images.ichigoDownRight;
+        if (this.x > canvas.width - (this.x - 590)) return;
+        this.x += 50; //aumenta x, mueve a la derecha
     }
     moveLeft(){
-        this.x -= 80; //disminuye x, mueve a la izquierda
         this.image.src = images.ichigoDownLeft;
+        if (this.x < canvas.width - (this.x + 1003.5)) return;
+        this.x -= 50; //disminuye x, mueve a la izquierda
     }
     draw() { 
-        this.y += this.gravity;
-        ctx.drawImage(this.image, this.x, this.y, this.width, this.height); //dibuja la imagen en el canvas.
+        if(this.y > canvas.height - this.y) {
+            ctx.drawImage(this.image, this.x, this.y, this.width, this.height); //dibuja la imagen en el canvas.
+        } else {
+            this.y += this.gravity;
+            ctx.drawImage(this.image, this.x, this.y, this.width, this.height); //dibuja la imagen en el canvas.
+        }
     }
 
 }
@@ -139,20 +152,19 @@ class Gudetama {
             this.draw(); //ejecuta la función dibujar
         }.bind(this) //pone el contenido de la función en el mismo contexto que el nivel arriba en el DOM
         this.gravity = 1.5; //se declara una variable gravedad, con el valor que se retoma más tarde.
-        this.randomNumber = 0;
-        this.dontChange = false;
-        this.getRandomNumber();
+        this.randomNumber = 0; //genera un número random
+        this.dontChange = false; //cambia la variable a falso. Esto sirve para el if, para evitar que genere más tamas de los necesarios.
+        this.getRandomNumber(); //llama la función obtener un número random
     }
 
     getRandomNumber(){
-        //this.image.src = gudetamaIntoTheFloor[Math.floor(Math.random()*gudetamaIntoTheFloor.length)];
-        this.randomNumber = Math.floor(Math.random() * gudetamaIntoTheFloor.length);
+        this.randomNumber = Math.floor(Math.random() * gudetamaIntoTheFloor.length); //genera un número random hasta el límite del array de imágenes de gudetama
     }
     checkFloor(){
-        if(this.dontChange) return;
-        if(this.y > canvas.height - 100) {
-            this.image.src = gudetamaIntoTheFloor[this.randomNumber];
-            this.dontChange = true;
+        if(this.dontChange) return; //Esto falso la primera vez que entra el loop, a partir de la siguiente, se vuelve verdadero.
+        if(this.y > canvas.height - 100) { //Si Y es mayor que lo que mide el canvas de alto, menos 100, ejecuta:
+            this.image.src = gudetamaIntoTheFloor[this.randomNumber]; //cambia la imágen de la clase por una random
+            this.dontChange = true; //hace que la variable se vuelva true y no permite que vuelva a cambiar a falso.
         }
         //console.log(this.randomNumber);
     }
@@ -203,15 +215,17 @@ function update() {
     board.draw(); //ejecuta la función draw, de la variable board, la cual contiene todo lo que está en la clase Board
     ichigo1.draw(); //ejecuta la función draw, de la variable ichigo1, la cual contiene todo lo que está en la clase IchigoMan
     //go.draw();
-
+    console.log(frames);
     imgGudetamaFalling();
     generateGudetamaFalling(); //ejecuta la función generar gudetamas cayendo
     drawGudetamas(); //ejecuta la función dibujar gudetamas que caen
     gudeTamas.forEach(function(g){
         isTouchingGudetama(ichigo1, g);
+    
     })
 }
 function inicio(){
+    //falta el sonido de inicio.
     board.iniciobg();
     addEventListener('keydown', function (e) {
         switch (e.keyCode) {
@@ -224,7 +238,7 @@ function start() {
     board.bgCasitas();
     if (interval) return; /* */
     interval = setInterval(update, 1000 / 60); //60 cuadros por segundo /* */
-    sound.play() //ejecuta sonido
+    startSound.play(); //ejecuta sonido
 }
 
 //aux functions
@@ -243,7 +257,7 @@ function generateGudetamaFalling() {
 
     if(frames % 100 === 0){ //Genera Gudetamas cada cierto tiempo, en este caso de 100 en 100 frames
         //var x = Math.floor(Math.random() * (canvas.width-200) + canvas.width/2 ); //genera un valor random para que aparezca el nuevo gudetama.
-        var x = Math.floor(Math.random() * (canvas.width - 200));
+        var x = Math.floor(Math.random() * (canvas.width + 50));
         //la x puede salir desde la mitad de lo que mide el canvas, hasta 100 pixeles antes de su límite de ancho
         var g = new Gudetama(x); //Se crea una nueva instancia para generar gudetamas
         gudeTamas.push(g); //Los nuevos gudetamas se guardan en un array que está declarado como vacío al principio del código.
@@ -273,9 +287,11 @@ function isTouchingGudetama(ichigo1,tama){
 function gameOver() {
     clearInterval(interval); //detiene la función intervalo
     interval = undefined; /* */
-    board.gameOverScreen(); //ejecuta la función de la variable board que contiene la clase Board
-    sound.pause(); //Detiene el sonido
-    sound.currentTime = 0; /* */
+    board.gameOverScreen();
+    inicialSound.pause(); //Detiene el sonido
+    inicialSound.currentTime = 0; /* */
+    startSound.pause();
+    startSound.currentTime = 0;
 }
 
 function restart() {
@@ -293,7 +309,7 @@ addEventListener('keydown', function (e) {
     switch (e.keyCode) {
         case 38:
             ichigo1.jump();
-            sound.play();
+            //sound.play();
             break;
         case 37:
             ichigo1.moveLeft();
