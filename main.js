@@ -202,27 +202,33 @@ class Gojira {
         this.x = canvas.width + 1600;
         this.y = canvas.height - 320;
         this.switch = true;
-        this.image = new Image();
-        this.image.src = images.huevito;
-        this.image.onload = function (){
-            this.draw();
+        this.imageHuevito = new Image();
+        this.imageHuevito.src = images.huevito;
+        this.image1 = new Image();
+        this.image1.src = images.gojira1;
+        this.image2 = new Image();
+        this.image2.src = images.gojira2;
+        this.drawable = this.imageHuevito;
+        //this.image.src = images.huevito;
+        this.drawable.onload = function() {
+          this.draw();
         }.bind(this);
     
     }
 
     draw(){
         if (this.x < canvas.width - 350) {
-            this.image.src =   this.switch ? images.gojira1 : images.gojira2;
             if(frames%10 === 0){
                 this.switch = !this.switch;
+                this.drawable = this.switch ? this.image1 : this.image2;
             } 
             approachingBoss.pause();
             approachingBoss.currentTime = 0;
             gojiraSong.play();
-            ctx.drawImage(this.image, this.x, this.y, this.width, this.height); //dibuja la imagen
+            ctx.drawImage(this.drawable, this.x, this.y, this.width, this.height); //dibuja la imagen
         } else {
             this.x--;
-            ctx.drawImage(this.image, this.x, this.y, this.width, this.height);
+            ctx.drawImage(this.drawable, this.x, this.y, this.width, this.height);
         }
     }
 }
@@ -247,10 +253,11 @@ class Laser {
 } 
 //instances
 
-var board = new Board(); /* */ //se crea una instancia para poder ejecutar las clases con sus constructores y funciones.
 var ichigo1 = new IchigoMan();/* */
 var go = new Gojira();
 var laser = new Laser();
+var board = new Board(); /* */ //se crea una instancia para poder ejecutar las clases con sus constructores y funciones.
+
 
 //mainFunctions
 
