@@ -38,6 +38,14 @@ var startSound = new Audio();
 startSound.src = '../IchigoGame/sounds/InvincibleKitty.mp3';
 startSound.loop = true;
 
+var approachingBoss = new Audio();
+approachingBoss.src = '../IchigoGame/sounds/ApproachingBoss.mp3';
+approachingBoss.loop = true;
+
+var gojiraSong = new Audio();
+gojiraSong.src = '../IchigoGame/sounds/Gojira.mp3';
+gojiraSong.loop = true;
+
 //class
 
 class Board { //Es el background del canvas
@@ -187,38 +195,31 @@ class Gojira {
     constructor(){
         this.width = 300;
         this.height = 300;
-        this.x = canvas.width+1600;
+        this.x = canvas.width + 1600;
         this.y = canvas.height - 320;
-    /*
-        this.which = true;
-        this.gojira = new Image();
-        this.gojira.src = images.gojira1;
-        this.gojirafeliz = new Image();
-        this.gojirafeliz.src = images.gojira2;
-    */
-   
+        this.switch = true;
         this.image = new Image();
-        this.image.src = images.gojira1;
+        this.image.src = images.huevito;
         this.image.onload = function (){
             this.draw();
         }.bind(this);
     
     }
+
     draw(){
-    
-        this.x--;
-        ctx.drawImage(this.image, this.x, this.y, this.width, this.height);
-   
-    /*
-        var img = this.which ? this.gojira : this.gojirafeliz;
-        ctx.drawImage(img, this.x, this.y, this.width, this.height);
-        if (frames % 20 === 0) {
-            this.toggleWhich();
+        if (this.x < canvas.width - 350) {
+            this.image.src =   this.switch ? images.gojira1 : images.gojira2;
+            if(frames%10 === 0){
+                this.switch = !this.switch;
+            } 
+            approachingBoss.pause();
+            approachingBoss.currentTime = 0;
+            gojiraSong.play();
+            ctx.drawImage(this.image, this.x, this.y, this.width, this.height); //dibuja la imagen
+        } else {
+            this.x--;
+            ctx.drawImage(this.image, this.x, this.y, this.width, this.height);
         }
-        this.toggleWhich = function () {
-        this.which = !this.which;
-    }
-    */
     }
 }
 
@@ -226,7 +227,6 @@ class Gojira {
 
 var board = new Board(); /* */ //se crea una instancia para poder ejecutar las clases con sus constructores y funciones.
 var ichigo1 = new IchigoMan();/* */
-var huevito = new Gojira();
 var go = new Gojira();
 
 //mainFunctions
@@ -242,12 +242,11 @@ function update() {
     drawGudetamas(); //ejecuta la función dibujar gudetamas que caen
     gudeTamas.forEach(function(g){
         isTouchingGudetama(ichigo1, g);
-    
     })
 }
 
 function inicio(){
-    //falta el sonido de inicio.
+    //inicialSound.play(); /* */ // No funciona
     board.iniciobg();
     addEventListener('keydown', function (e) {
         switch (e.keyCode) {
@@ -257,8 +256,9 @@ function inicio(){
 }});}
 
 function start() {
+    //inicialSound.pause(); /* */ // No funciona
+    //inicialSound.currentTime = 0; /* */ // No funciona
     board.bgCasitas();
-    //go.draw();
     if (interval) return; /* */
     interval = setInterval(update, 1000 / 60); //60 cuadros por segundo /* */
     startSound.play(); //ejecuta sonido
@@ -279,13 +279,16 @@ function imgGudetamaPushed() { //imagen random para gudetama tocado en el piso
 function generateGudetamaFalling() {
 
     if (frames % 100 === 0 && (Math.floor(frames / 60) < 29)){ //Genera Gudetamas cada cierto tiempo, en este caso de 100 en 100 frames
-        //var x = Math.floor(Math.random() * (canvas.width-200) + canvas.width/2 ); //genera un valor random para que aparezca el nuevo gudetama.
-        var x = Math.floor(Math.random() * (canvas.width + 50));
-        //la x puede salir desde la mitad de lo que mide el canvas, hasta 100 pixeles antes de su límite de ancho
+        var x = Math.floor(Math.random() * (canvas.width + 50)); //distancia en la que se generan en el canvas
         var g = new Gudetama(x); //Se crea una nueva instancia para generar gudetamas
         gudeTamas.push(g); //Los nuevos gudetamas se guardan en un array que está declarado como vacío al principio del código.
+    } 
+    
+    if(Math.floor(frames/60) > 25){
+        startSound.pause();
+        startSound.currentTime = 0;
+        approachingBoss.play();
     }
-
 }
 
 function drawGudetamas(){ 
@@ -326,10 +329,6 @@ function restart() {
     ichigo1.y = 100;
     inicio();
 }
-
-//function aproachBossHuevito(){
-  //  huevito.draw();
-//}
 
 //listeners
 addEventListener('keydown', function (e) {
