@@ -20,6 +20,7 @@ var images = {
     huevito: '../IchigoGame/images/huevito.png',
     gojira1: '../IchigoGame/images/gojira1.png',
     gojira2: '../IchigoGame/images/gojira2.png',
+    laser: '../IchigoGame/images/lasershoot.png',
     bg: '../IchigoGame/images/Background.png' //Es el background del videojuego
 }
 
@@ -135,6 +136,9 @@ class IchigoMan {
         if (this.x < canvas.width - (this.x + 1003.5)) return;
         this.x -= 50; //disminuye x, mueve a la izquierda
     }
+    kick(){
+        this.image.src = images.kick;
+    }
     draw() { 
         if(this.y > canvas.height - this.y) {
             ctx.drawImage(this.image, this.x, this.y, this.width, this.height); //dibuja la imagen en el canvas.
@@ -223,11 +227,30 @@ class Gojira {
     }
 }
 
+class Laser {
+    constructor(){
+        this.width = 624;
+        this.height = 98;
+        this.x = canvas.width/2;
+        this.y = canvas.height/2;
+        this.image = new Image();
+        this.image.src = images.laser;
+        this.image.onload = function () {
+            this.draw();
+        }.bind(this);
+
+    }
+
+    draw() {
+        ctx.drawImage(this.image, this.x, this.y, this.width, this.height);
+    }
+} 
 //instances
 
 var board = new Board(); /* */ //se crea una instancia para poder ejecutar las clases con sus constructores y funciones.
 var ichigo1 = new IchigoMan();/* */
 var go = new Gojira();
+var laser = new Laser();
 
 //mainFunctions
 
@@ -237,12 +260,17 @@ function update() {
     board.draw(); //ejecuta la función draw, de la variable board, la cual contiene todo lo que está en la clase Board
     ichigo1.draw(); //ejecuta la función draw, de la variable ichigo1, la cual contiene todo lo que está en la clase IchigoMan
     go.draw();
+
     imgGudetamaFalling();
     generateGudetamaFalling(); //ejecuta la función generar gudetamas cayendo
     drawGudetamas(); //ejecuta la función dibujar gudetamas que caen
     gudeTamas.forEach(function(g){
         isTouchingGudetama(ichigo1, g);
-    })
+    });/*
+    if(Math.floor(frames/60) > 32){
+        laser.draw();
+        isTouchingLaser(ichigo1, laser);
+    }*/
 }
 
 function inicio(){
@@ -311,6 +339,16 @@ function isTouchingGudetama(ichigo1,tama){
     }
 }
 
+function isTouchingLaser(ichigo1,laser){
+    if ((ichigo1.x < laser.x + laser.width) &&
+        (ichigo1.x + ichigo1.width > laser.x) &&
+        (ichigo1.y < laser.y + laser.height) &&
+        (ichigo1.y + ichigo1.height > laser.y)) {
+        ichigo1.receiveDamage(1);
+        //poner sonido
+    }
+}
+
 function gameOver() {
     clearInterval(interval); //detiene la función intervalo
     interval = undefined; /* */
@@ -349,6 +387,9 @@ addEventListener('keydown', function (e) {
             break;
         case 27:
             restart();
+            break;
+        case 32:
+            ichigo1.kick();
             break;
         //case 13:
             //start();
