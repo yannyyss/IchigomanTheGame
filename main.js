@@ -17,7 +17,9 @@ var images = {
     ichigoDownRight: '../IchigoGame/images/downrigth.png',
     startGame: '../IchigoGame/images/StartPortada.png',
     gameOver: '../IchigoGame/images/gameover.png',
+    huevito: '../IchigoGame/images/huevito.png',
     gojira1: '../IchigoGame/images/gojira1.png',
+    gojira2: '../IchigoGame/images/gojira2.png',
     bg: '../IchigoGame/images/Background.png' //Es el background del videojuego
 }
 
@@ -69,7 +71,7 @@ class Board { //Es el background del canvas
         ctx.drawImage(this.image, this.x + this.width, this.y, this.width, this.height); /* */
         ctx.fillStyle = "white"; //Esto pinta el siguiente elemento marcador
         ctx.font = '50px Avenir'; //Esto define el tamaño y la letra del marcador
-        //ctx.fillText(Math.floor(frames / 60), this.width - 100, 50); //es un texto que cambia con los frames. /* */ No sé que significa en su totalidad.
+        ctx.fillText(Math.floor(frames / 60), this.width - 100, 50); //es un texto que cambia con los frames. /* */ No sé que significa en su totalidad.
     }
     gameOverScreen() { //es la función que termina el juego
         this.x = 0;
@@ -183,19 +185,40 @@ class Gudetama {
 
 class Gojira {
     constructor(){
-        this.x = canvas.width;
-        this.y = canvas.height-300;
-        this.width = 250;
-        this.height = 250;
+        this.width = 300;
+        this.height = 300;
+        this.x = canvas.width+1600;
+        this.y = canvas.height - 320;
+    /*
+        this.which = true;
+        this.gojira = new Image();
+        this.gojira.src = images.gojira1;
+        this.gojirafeliz = new Image();
+        this.gojirafeliz.src = images.gojira2;
+    */
+   
         this.image = new Image();
         this.image.src = images.gojira1;
         this.image.onload = function (){
             this.draw();
         }.bind(this);
+    
     }
     draw(){
+    
         this.x--;
         ctx.drawImage(this.image, this.x, this.y, this.width, this.height);
+   
+    /*
+        var img = this.which ? this.gojira : this.gojirafeliz;
+        ctx.drawImage(img, this.x, this.y, this.width, this.height);
+        if (frames % 20 === 0) {
+            this.toggleWhich();
+        }
+        this.toggleWhich = function () {
+        this.which = !this.which;
+    }
+    */
     }
 }
 
@@ -203,6 +226,7 @@ class Gojira {
 
 var board = new Board(); /* */ //se crea una instancia para poder ejecutar las clases con sus constructores y funciones.
 var ichigo1 = new IchigoMan();/* */
+var huevito = new Gojira();
 var go = new Gojira();
 
 //mainFunctions
@@ -212,7 +236,7 @@ function update() {
     ctx.clearRect(0, 0, canvas.width, canvas.height); //limpia el canvas
     board.draw(); //ejecuta la función draw, de la variable board, la cual contiene todo lo que está en la clase Board
     ichigo1.draw(); //ejecuta la función draw, de la variable ichigo1, la cual contiene todo lo que está en la clase IchigoMan
-    //go.draw();
+    go.draw();
     imgGudetamaFalling();
     generateGudetamaFalling(); //ejecuta la función generar gudetamas cayendo
     drawGudetamas(); //ejecuta la función dibujar gudetamas que caen
@@ -234,6 +258,7 @@ function inicio(){
 
 function start() {
     board.bgCasitas();
+    //go.draw();
     if (interval) return; /* */
     interval = setInterval(update, 1000 / 60); //60 cuadros por segundo /* */
     startSound.play(); //ejecuta sonido
@@ -253,7 +278,7 @@ function imgGudetamaPushed() { //imagen random para gudetama tocado en el piso
 
 function generateGudetamaFalling() {
 
-    if(frames % 100 === 0){ //Genera Gudetamas cada cierto tiempo, en este caso de 100 en 100 frames
+    if (frames % 100 === 0 && (Math.floor(frames / 60) < 29)){ //Genera Gudetamas cada cierto tiempo, en este caso de 100 en 100 frames
         //var x = Math.floor(Math.random() * (canvas.width-200) + canvas.width/2 ); //genera un valor random para que aparezca el nuevo gudetama.
         var x = Math.floor(Math.random() * (canvas.width + 50));
         //la x puede salir desde la mitad de lo que mide el canvas, hasta 100 pixeles antes de su límite de ancho
@@ -279,6 +304,7 @@ function isTouchingGudetama(ichigo1,tama){
             return index !== i;
         });
         ichigo1.receiveDamage(1);
+        //poner sonido
     }
 }
 
@@ -300,6 +326,10 @@ function restart() {
     ichigo1.y = 100;
     inicio();
 }
+
+//function aproachBossHuevito(){
+  //  huevito.draw();
+//}
 
 //listeners
 addEventListener('keydown', function (e) {
