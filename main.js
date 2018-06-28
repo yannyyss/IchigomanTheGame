@@ -16,6 +16,7 @@ var images = {
     ichigoDown: '../IchigoGame/images/down.png',
     ichigoDownLeft: '../IchigoGame/images/downleft.PNG',
     ichigoDownRight: '../IchigoGame/images/downrigth.png',
+    startGame: '../IchigoGame/images/StartPortada.png',
     gameOver: '../IchigoGame/images/gameover.png',
     gojira1: '../IchigoGame/images/gojira1.png',
     bg: '../IchigoGame/images/Background.png' //Es el background del videojuego
@@ -43,39 +44,45 @@ class Board { //Es el background del canvas
         this.width = canvas.width; //mide el ancho del canvas
         this.height = canvas.height; //mide el alto del canvas
         this.image = new Image(); /* */
-        this.image.src = images.bg; //selecciona la imágen background que está en el arreglo de images.
+        this.image.src = images.startGame; //selecciona la imágen background que está en el arreglo de images.
         this.image.onload = function () { // Cuando se carga completamente la imagen:
             this.draw(); //ejecuta la función draw.
         }.bind(this) //pone la variable dray en el mismo contexto de lo que se encuentra en el siguiente nivel del DOM
     }
-
-    gameOverScreen() { //es la función que termina el juego
-        this.image.src = images.gameOver;
-        ctx.drawImage(this.image, this.x, this.y, this.width, this.height);
-        ctx.font = "20px Helvetica"; // estilo del siguiente string
-        ctx.fillStyle = 'red'; // color del siguiente string 
-        ctx.fillText("Score", 20, 150); // muestra un stringo en la posición indicada
-        ctx.fillText(Math.floor(frames / 60), this.width - 100, 50);
+    iniciobg(){
+        this.x = 0;
+        this.y = 0;
+        this.image.src = images.startGame;
     }
-
+    bgCasitas(){
+        this.x = 0;
+        this.y = 0;
+        this.image.src = images.bg;
+    }
     draw() { //es la función que dibuja el background
         this.x--; //cada vez que dibuja, resta uno a x.
         if (this.x === -this.width) this.x = 0; // si x es menor que el ancho de la imagen, x cambia su valor a 0
         ctx.drawImage(this.image, this.x, this.y, this.width, this.height); //dibuja la imagen del background en el contexto
         ctx.drawImage(this.image, this.x + this.width, this.y, this.width, this.height); /* */
-        //ctx.fillStyle = "white"; //Esto pinta el siguiente elemento marcador
-        //ctx.font = '50px Avenir'; //Esto define el tamaño y la letra del marcador
-        //ctx.fillText(Math.floor(frames / 60), this.width - 100, 50); //es un texto que cambia con los frames. /* */ No sé que significa en su totalidad.
+        ctx.fillStyle = "white"; //Esto pinta el siguiente elemento marcador
+        ctx.font = '50px Avenir'; //Esto define el tamaño y la letra del marcador
+        ctx.fillText(Math.floor(frames / 60), this.width - 100, 50); //es un texto que cambia con los frames. /* */ No sé que significa en su totalidad.
+    }
+    gameOverScreen() { //es la función que termina el juego
+        this.x = 0;
+        this.y = 0;
+        this.image.src = images.gameOver;
+
     }
 }
 
 class IchigoMan {
-    constructor(health = 3) {
+    constructor() {
         this.x = 60; //posición x del elemento en el canvas
         this.y = 220; //posición y del elemento en el canvas
         this.width = 220; //ancho del elemento
         this.height = 250; //alto del elemento
-        this.health = health;
+        this.health = 1;
         this.image = new Image(); /**/
         this.image.src = images.ichigoRun1; //ruta de la imagen que está en el objeto images
         this.image.onload = function () { //cuando se cargue la imagen:
@@ -84,7 +91,9 @@ class IchigoMan {
         this.gravity = 1; //asigna una variable que se llamará gravedad, la cual se usa más adelante.
     }
     receiveDamage(damage) {
+        this.image.src = images.ichigoPunched;
         this.health -= damage;
+        /* */ //Borrar current gudetama
         if (this.health > 0) {
           console.log("Has received " + damage + " points of damage");
         } else {
@@ -95,8 +104,9 @@ class IchigoMan {
     }
 
     jump() { //arreglar el salto /* */
-        this.y -= 80;
         this.image.src = images.ichigoJump;
+        if (this.y = 5) return;
+        this.y -= 80;
     }
     moveDown() {
         this.y += 80; //disminuye y, mueve abajo
@@ -110,14 +120,6 @@ class IchigoMan {
         this.x -= 80; //disminuye x, mueve a la izquierda
         this.image.src = images.ichigoDownLeft;
     }
-    /*
-    isTouching(item) { 
-        return (this.x < item.x + item.width) &&
-            (this.x + this.width > item.x) &&
-            (this.y < item.y + item.height) &&
-            (this.y + this.height > item.y);
-    }
-    */
     draw() { 
         this.y += this.gravity;
         ctx.drawImage(this.image, this.x, this.y, this.width, this.height); //dibuja la imagen en el canvas.
@@ -205,9 +207,21 @@ function update() {
     imgGudetamaFalling();
     generateGudetamaFalling(); //ejecuta la función generar gudetamas cayendo
     drawGudetamas(); //ejecuta la función dibujar gudetamas que caen
+    gudeTamas.forEach(function(g){
+        isTouchingGudetama(ichigo1, g);
+    })
 }
+function inicio(){
+    board.iniciobg();
+    addEventListener('keydown', function (e) {
+        switch (e.keyCode) {
+            case 13:
+                start();
+                break;
+}});}
 
 function start() {
+    board.bgCasitas();
     if (interval) return; /* */
     interval = setInterval(update, 1000 / 60); //60 cuadros por segundo /* */
     sound.play() //ejecuta sonido
@@ -238,8 +252,8 @@ function generateGudetamaFalling() {
 }
 
 function drawGudetamas(){ 
-    gudeTamas.forEach(function(Tama){ //recorre el array de los gudetamas creados por el método de instancia.
-        Tama.draw();//toma un elemento del array y lo dibuja.
+    gudeTamas.forEach(function(tama){ //recorre el array de los gudetamas creados por el método de instancia.
+        tama.draw();//toma un elemento del array y lo dibuja.
     })
 }
 
@@ -248,7 +262,11 @@ function isTouchingGudetama(ichigo1,tama){
     (ichigo1.x + ichigo1.width > tama.x) &&
     (ichigo1.y < tama.y + tama.height) &&
     (ichigo1.y + ichigo1.height > tama.y)){
-    ichigo1.receiveDamage(1);
+        var i = gudeTamas.indexOf(tama);
+        gudeTamas = gudeTamas.filter(function (tama, index) {
+            return index !== i;
+        });
+        ichigo1.receiveDamage(1);
     }
 }
 
@@ -266,11 +284,12 @@ function restart() {
     frames = 0;
     ichigo1.x = 100;
     ichigo1.y = 100;
-    start();
+    inicio();
 }
 
 //listeners
 addEventListener('keydown', function (e) {
+    if(!interval) return;
     switch (e.keyCode) {
         case 38:
             ichigo1.jump();
@@ -289,9 +308,9 @@ addEventListener('keydown', function (e) {
             restart();
             break;
         //case 13:
-          //  start();
+            //start();
             //break;
     }
 });
 
-start();
+inicio();
