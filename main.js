@@ -4,12 +4,11 @@ var ctx = canvas.getContext('2d'); //genera una variable contexto que sirve como
 //constants
 var interval; 
 var frames = 0; //la variable frames empieza en cero.
-var score;
+var score = 0;
 var gudeTamas = []; //array de nuevos gudetamas. Empieza vacío.
 
 var images = {
-    ichigoRun1: '../IchigoGame/images/running1.png',
-    ichigoRun2: '../IchigoGame/images/running2.png',
+    ichigoRun1: '../IchigoGame/images/running2.png',
     ichigoFall: '../IchigoGame/images/fall.png',
     ichigoJump: '../IchigoGame/images/jumping.png',
     ichigoPunched: '../IchigoGame/images/punched.png',
@@ -23,7 +22,6 @@ var images = {
 }
 
 var gudetamaFalling = ['../IchigoGame/images/falling1.png','../IchigoGame/images/falling2.png','../IchigoGame/images/falling3.png'];
-var randomGudetama = '';
 
 var gudetamaIntoTheFloor = ['../IchigoGame/images/floor1.png','../IchigoGame/images/floor2.png','../IchigoGame/images/floor3.png','../IchigoGame/images/floor4.png','../IchigoGame/images/floor5.png'];
 var gudetamaPushed = ['../IchigoGame/images/pushed1.png','../IchigoGame/images/pushed2.png'];
@@ -71,7 +69,7 @@ class Board { //Es el background del canvas
         ctx.drawImage(this.image, this.x + this.width, this.y, this.width, this.height); /* */
         ctx.fillStyle = "white"; //Esto pinta el siguiente elemento marcador
         ctx.font = '50px Avenir'; //Esto define el tamaño y la letra del marcador
-        ctx.fillText(Math.floor(frames / 60), this.width - 100, 50); //es un texto que cambia con los frames. /* */ No sé que significa en su totalidad.
+        //ctx.fillText(Math.floor(frames / 60), this.width - 100, 50); //es un texto que cambia con los frames. /* */ No sé que significa en su totalidad.
     }
     gameOverScreen() { //es la función que termina el juego
         this.x = 0;
@@ -84,9 +82,9 @@ class IchigoMan {
     constructor() {
         this.x = 60; //posición x del elemento en el canvas
         this.y = 200; //posición y del elemento en el canvas
-        this.width = 220; //ancho del elemento
+        this.width = 190; //ancho del elemento
         this.height = 250; //alto del elemento
-        this.health = 3;
+        this.health = 30;
         this.image = new Image(); /**/
         this.image.src = images.ichigoRun1; //ruta de la imagen que está en el objeto images
         this.image.onload = function () { //cuando se cargue la imagen:
@@ -109,13 +107,11 @@ class IchigoMan {
 
     jump() { //arreglar el salto /* */
         this.image.src = images.ichigoJump;
-        console.log(this.y);
         if (this.y <= 40) return;
         this.y -= 50;
     }
     moveDown() {
         this.image.src = images.ichigoDown;
-        console.log(this.y);
         if (this.y > 255) return;
         this.y += 50; //disminuye y, mueve abajo
     }
@@ -144,7 +140,7 @@ class Gudetama {
     constructor(x = canvas.width/2) { //recibe el valor de x, porque se genera random en otra función, si no encuentra a x, le asigna a x el valor de la mitad del canvas.
         this.x = x; //X recibe una X del exterior
         this.y = 0; //la posición Y vale 0
-        this.width = 100; // ancho del gudetama
+        this.width = 90; // ancho del gudetama
         this.height = 100; // alto del gudetama
         this.image = new Image(); /* */
         this.image.src = randomGudetamaFalling; //recibe una imagen random de gudetama /* */
@@ -162,7 +158,9 @@ class Gudetama {
     }
     checkFloor(){
         if(this.dontChange) return; //Esto falso la primera vez que entra el loop, a partir de la siguiente, se vuelve verdadero.
-        if(this.y > canvas.height - 100) { //Si Y es mayor que lo que mide el canvas de alto, menos 100, ejecuta:
+        if(this.y > canvas.height - 90) { //Si Y es mayor que lo que mide el canvas de alto, menos 100, ejecuta:
+            this.width = 100; // ancho del gudetama
+            this.height = 70; // alto del gudetama
             this.image.src = gudetamaIntoTheFloor[this.randomNumber]; //cambia la imágen de la clase por una random
             this.dontChange = true; //hace que la variable se vuelva true y no permite que vuelva a cambiar a falso.
         }
@@ -170,7 +168,7 @@ class Gudetama {
     }
 
     draw() {
-        if(this.y < canvas.height-100){
+        if(this.y < canvas.height-90){
             this.y += this.gravity; //suma el valor de la variable gravedad a y, de esta manera y incrementa cada vez que se dibuja.
             this.x--; //resta 1 al valor de x, de esta manera, el objeto se dibuja cada vez más hacia la izquierda
             ctx.drawImage(this.image, this.x, this.y, this.width, this.height); //dibuja la imagen
@@ -215,7 +213,6 @@ function update() {
     board.draw(); //ejecuta la función draw, de la variable board, la cual contiene todo lo que está en la clase Board
     ichigo1.draw(); //ejecuta la función draw, de la variable ichigo1, la cual contiene todo lo que está en la clase IchigoMan
     //go.draw();
-    console.log(frames);
     imgGudetamaFalling();
     generateGudetamaFalling(); //ejecuta la función generar gudetamas cayendo
     drawGudetamas(); //ejecuta la función dibujar gudetamas que caen
@@ -224,6 +221,7 @@ function update() {
     
     })
 }
+
 function inicio(){
     //falta el sonido de inicio.
     board.iniciobg();
