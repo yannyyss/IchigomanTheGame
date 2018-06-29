@@ -4,7 +4,7 @@ var ctx = canvas.getContext('2d'); //genera una variable contexto que sirve como
 //constants
 var interval; 
 var frames = 0; //la variable frames empieza en cero.
-var score = 0;
+var score = Math.floor(frames/60);
 var gudeTamas = []; //array de nuevos gudetamas. Empieza vacío.
 
 var images = {
@@ -21,11 +21,11 @@ var images = {
     gojira1: '../IchigoGame/images/gojira1.png',
     gojira2: '../IchigoGame/images/gojira2.png',
     laser: '../IchigoGame/images/lasershoot.png',
+    laserCharged: '../IchigoGame/images/lasercharged.png',
     bg: '../IchigoGame/images/Background.png' //Es el background del videojuego
 }
 
 var gudetamaFalling = ['../IchigoGame/images/falling1.png','../IchigoGame/images/falling2.png','../IchigoGame/images/falling3.png'];
-
 var gudetamaIntoTheFloor = ['../IchigoGame/images/floor1.png','../IchigoGame/images/floor2.png','../IchigoGame/images/floor3.png','../IchigoGame/images/floor4.png','../IchigoGame/images/floor5.png'];
 var gudetamaPushed = ['../IchigoGame/images/pushed1.png','../IchigoGame/images/pushed2.png'];
 
@@ -79,8 +79,8 @@ class Board { //Es el background del canvas
         ctx.drawImage(this.image, this.x, this.y, this.width, this.height); //dibuja la imagen del background en el contexto
         ctx.drawImage(this.image, this.x + this.width, this.y, this.width, this.height); /* */
         ctx.fillStyle = "white"; //Esto pinta el siguiente elemento marcador
-        ctx.font = '50px Avenir'; //Esto define el tamaño y la letra del marcador
-        ctx.fillText(Math.floor(frames / 60), this.width - 100, 50); //es un texto que cambia con los frames. /* */ No sé que significa en su totalidad.
+        ctx.font = '40px Avenir'; //Esto define el tamaño y la letra del marcador
+        //ctx.fillText("Score" + Math.floor(frames / 60), this.width - 200, 50); //es un texto que cambia con los frames. /* */ No sé que significa en su totalidad.
     }
     gameOverScreen() { //es la función que termina el juego
         this.x = 0;
@@ -95,7 +95,8 @@ class IchigoMan {
         this.y = 200; //posición y del elemento en el canvas
         this.width = 190; //ancho del elemento
         this.height = 250; //alto del elemento
-        this.health = 30;
+        this.health = 5;
+        this.kicking = false;
         this.image = new Image(); /**/
         this.image.src = images.ichigoRun1; //ruta de la imagen que está en el objeto images
         this.image.onload = function () { //cuando se cargue la imagen:
@@ -116,7 +117,7 @@ class IchigoMan {
         return;
     }
 
-    jump() { //arreglar el salto /* */
+    jump() { 
         this.image.src = images.ichigoJump;
         if (this.y <= 40) return;
         this.y -= 50;
@@ -138,6 +139,7 @@ class IchigoMan {
     }
     kick(){
         this.image.src = images.kick;
+
     }
     draw() { 
         if(this.y > canvas.height - this.y) {
@@ -251,12 +253,26 @@ class Laser {
         ctx.drawImage(this.image, this.x, this.y, this.width, this.height);
     }
 } 
+class Vidas {
+    constructor() {
+        this.x = 20;
+        this.y = 50;
+    }
+    draw() {
+        console.log(ichigo1.health);
+        ctx.fillText("Lives " + ichigo1.health, this.x, this.y);
+        ctx.fillText("Score " + Math.floor(frames / 60), canvas.width - 200, 50); //es un texto que cambia con los frames. /* */ No sé que significa en su totalidad.
+    }
+}
+
 //instances
 
 var ichigo1 = new IchigoMan();/* */
+var vida = new Vidas();
 var go = new Gojira();
 var laser = new Laser();
 var board = new Board(); /* */ //se crea una instancia para poder ejecutar las clases con sus constructores y funciones.
+//la instancia board se crea al final para que en la pantalla de inicio, cuando se pinta el canvas no se vean las demás imágenes.
 
 
 //mainFunctions
@@ -267,6 +283,7 @@ function update() {
     board.draw(); //ejecuta la función draw, de la variable board, la cual contiene todo lo que está en la clase Board
     ichigo1.draw(); //ejecuta la función draw, de la variable ichigo1, la cual contiene todo lo que está en la clase IchigoMan
     go.draw();
+    vida.draw();
 
     imgGudetamaFalling();
     generateGudetamaFalling(); //ejecuta la función generar gudetamas cayendo
@@ -286,6 +303,7 @@ function inicio(){
     addEventListener('keydown', function (e) {
         switch (e.keyCode) {
             case 13:
+            //clearInterval(interval);
                 start();
                 break;
 }});}
@@ -364,6 +382,10 @@ function gameOver() {
     inicialSound.currentTime = 0; /* */
     startSound.pause();
     startSound.currentTime = 0;
+    approachingBoss.pause();
+    approachingBoss.currentTime = 0;
+    gojiraSong.pause();
+    gojiraSong.currentTime = 0;
 }
 
 function restart() {
