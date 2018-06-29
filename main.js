@@ -78,6 +78,11 @@ class Board { //Es el background del canvas
         this.y = 0;
         this.image.src = images.bg;
     }
+    bgYouWon() {
+        this.x = 0;
+        this.y = 0;
+        this.image.src = images.youWon;
+    }
     draw() { 
         //es la función que dibuja el background
         this.x--; //cada vez que dibuja, resta uno a x.
@@ -236,6 +241,7 @@ class Gojira {
     } else {
       ctx.fillText("Gojira has died " + gojira.health, this.x, this.y);
       console.log("Gojira has died");
+      won();
     }
     return;
   }
@@ -436,6 +442,27 @@ function gameOver() {
                 restart();
                 break;
         }
+    });
+}
+function won(){
+    clearInterval(interval); //detiene la función intervalo
+    interval = undefined; /* */
+    board.bgYouWon();
+    inicialSound.pause(); //Detiene el sonido
+    inicialSound.currentTime = 0; /* */
+    startSound.pause();
+    startSound.currentTime = 0;
+    approachingBoss.pause();
+    approachingBoss.currentTime = 0;
+    gojiraSong.pause();
+    gojiraSong.currentTime = 0;
+    nivel1 = false;
+    addEventListener("keydown", function(e) {
+      switch (e.keyCode) {
+        case 13:
+          restart();
+          break;
+      }
     });
 }
 
