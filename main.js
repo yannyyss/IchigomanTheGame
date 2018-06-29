@@ -351,6 +351,89 @@ function start() {
     startSound.play(); //ejecuta sonido
 }
 
+function restart() {
+    //bliss hack
+    window.location.reload();
+    if (nivel1 === false) {
+        inicio();
+        //if (interval) return;
+        // gorija.x = canvas.width + 1600;
+        // gojira.image3.src = images.gojira3;
+        // gojira.health = 3;
+        // gudeTamas = [];
+        // frames = 0;
+        // ichigo1.x = 100;
+        // ichigo1.y = 100;
+        // ichigo1.health = 6;
+
+
+    }
+}
+function gameOver() {
+  clearInterval(interval); //detiene la función intervalo
+  interval = undefined; /* */
+  board.gameOverScreen();
+  inicialSound.pause(); //Detiene el sonido
+  inicialSound.currentTime = 0; /* */
+  startSound.pause();
+  startSound.currentTime = 0;
+  approachingBoss.pause();
+  approachingBoss.currentTime = 0;
+  gojiraSong.pause();
+  gojiraSong.currentTime = 0;
+  nivel1 = false;
+  addEventListener("keydown", function(e) {
+    switch (e.keyCode) {
+      case 13:
+        restart();
+        break;
+    }
+  });
+
+    saveScore();
+
+
+}
+function won() {
+  clearInterval(interval); //detiene la función intervalo
+  interval = undefined; /* */
+  board.bgYouWon();
+  inicialSound.pause(); //Detiene el sonido
+  inicialSound.currentTime = 0; /* */
+  startSound.pause();
+  startSound.currentTime = 0;
+  approachingBoss.pause();
+  approachingBoss.currentTime = 0;
+  gojiraSong.pause();
+  gojiraSong.currentTime = 0;
+  nivel1 = false;
+  addEventListener("keydown", function(e) {
+    switch (e.keyCode) {
+      case 13:
+        restart();
+        break;
+    }
+  });
+
+  saveScore();
+
+}
+
+
+function saveScore(){
+    //obtenemos los anteriores
+    var scores = localStorage.getItem('scores');
+    if(!scores) scores = [];
+    scores = JSON.parse(scores);
+    //esto guarda:
+    var bliss = Math.floor(frames / 60 + ichigo1.health);
+    scores.push(bliss)
+    scores = JSON.stringify(scores);
+    localStorage.setItem('scores', scores);
+    //esto saca del navegador
+
+}
+
 //aux functions
 
 function imgGudetamaFalling() { //imagen random para gudetama cayendo
@@ -423,64 +506,6 @@ function isTouchingGojira(ichigo1,gorija){
     }
 }
 
-function gameOver() {
-    clearInterval(interval); //detiene la función intervalo
-    interval = undefined; /* */
-    board.gameOverScreen();
-    inicialSound.pause(); //Detiene el sonido
-    inicialSound.currentTime = 0; /* */
-    startSound.pause();
-    startSound.currentTime = 0;
-    approachingBoss.pause();
-    approachingBoss.currentTime = 0;
-    gojiraSong.pause();
-    gojiraSong.currentTime = 0;
-    nivel1 = false;
-    addEventListener('keydown', function (e) {
-        switch (e.keyCode) {
-            case 13:
-                restart();
-                break;
-        }
-    });
-}
-function won(){
-    clearInterval(interval); //detiene la función intervalo
-    interval = undefined; /* */
-    board.bgYouWon();
-    inicialSound.pause(); //Detiene el sonido
-    inicialSound.currentTime = 0; /* */
-    startSound.pause();
-    startSound.currentTime = 0;
-    approachingBoss.pause();
-    approachingBoss.currentTime = 0;
-    gojiraSong.pause();
-    gojiraSong.currentTime = 0;
-    nivel1 = false;
-    addEventListener("keydown", function(e) {
-      switch (e.keyCode) {
-        case 13:
-          restart();
-          break;
-      }
-    });
-}
-
-function restart() {
-
-    if(nivel1 === false){
-        inicio();
-        if (interval) return;
-        gorija.x = canvas.width + 1600;
-        gojira.image3.src = images.gojira3;
-        gojira.health = 3;
-        gudeTamas = [];
-        frames = 0;
-        ichigo1.x = 100;
-        ichigo1.y = 100;
-        ichigo1.health = 6;
-    }
-}
 
 //listeners
 addEventListener('keydown', function (e) {
