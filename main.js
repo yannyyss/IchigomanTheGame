@@ -20,8 +20,7 @@ var images = {
     huevito: '../IchigoGame/images/huevito.png',
     gojira1: '../IchigoGame/images/gojira1.png',
     gojira2: '../IchigoGame/images/gojira2.png',
-    laser: '../IchigoGame/images/lasershoot.png',
-    laserCharged: '../IchigoGame/images/lasercharged.png',
+    laser: '../IchigoGame/images/laser.png',
     bg: '../IchigoGame/images/Background.png' //Es el background del videojuego
 }
 
@@ -98,7 +97,7 @@ class IchigoMan {
         this.y = 200; //posición y del elemento en el canvas
         this.width = 190; //ancho del elemento
         this.height = 250; //alto del elemento
-        this.health = 4;
+        this.health = 40;
         this.kicking = false;
         this.image = new Image(); /**/
         this.image.src = images.ichigoRun1; //ruta de la imagen que está en el objeto images
@@ -205,7 +204,7 @@ class Gojira {
         this.width = 300;
         this.height = 300;
         this.x = canvas.width + 1600;
-        this.y = canvas.height - 320;
+        this.y = canvas.height - 300;
         this.switch = true;
         this.imageHuevito = new Image();
         this.imageHuevito.src = images.huevito;
@@ -222,7 +221,7 @@ class Gojira {
     }
 
     draw(){
-        if (this.x < canvas.width - 350) {
+        if (this.x < canvas.width - 280) {
             if(frames%10 === 0){
                 this.switch = !this.switch;
                 this.drawable = this.switch ? this.image1 : this.image2;
@@ -240,10 +239,10 @@ class Gojira {
 
 class Laser {
     constructor(){
-        this.width = 624;
-        this.height = 98;
+        this.width = 197;
+        this.height = 78;
         this.x = canvas.width/2;
-        this.y = canvas.height/2;
+        this.y = canvas.height-150;
         this.image = new Image();
         this.image.src = images.laser;
         this.image.onload = function () {
@@ -253,7 +252,16 @@ class Laser {
     }
 
     draw() {
-        ctx.drawImage(this.image, this.x, this.y, this.width, this.height);
+        if (Math.floor(frames/60) > 40) {
+            if(Math.floor(frames/60) % 2 === 0){
+                this.x--;
+                console.log("aquí toy");
+                ctx.drawImage(this.image, this.x, this.y, this.width, this.height);
+                if(this.x === 150){
+                    this.x = canvas.width/2;
+                }
+            }
+        }
     }
 } 
 class Vidas {
@@ -287,17 +295,15 @@ function update() {
     ichigo1.draw(); //ejecuta la función draw, de la variable ichigo1, la cual contiene todo lo que está en la clase IchigoMan
     go.draw();
     vida.draw();
+    laser.draw();
 
     imgGudetamaFalling();
     generateGudetamaFalling(); //ejecuta la función generar gudetamas cayendo
     drawGudetamas(); //ejecuta la función dibujar gudetamas que caen
     gudeTamas.forEach(function(g){
         isTouchingGudetama(ichigo1, g);
-    });/*
-    if(Math.floor(frames/60) > 32){
-        laser.draw();
-        isTouchingLaser(ichigo1, laser);
-    }*/
+    });
+    isTouchingLaser(ichigo1,laser);
 }
 
 function inicio(){
@@ -364,17 +370,19 @@ function isTouchingGudetama(ichigo1,tama){
             return index !== i;
         });
         ichigo1.receiveDamage(1);
-        //poner sonido
     }
 }
 
 function isTouchingLaser(ichigo1,laser){
-    if ((ichigo1.x < laser.x + laser.width) &&
-        (ichigo1.x + ichigo1.width > laser.x) &&
-        (ichigo1.y < laser.y + laser.height) &&
-        (ichigo1.y + ichigo1.height > laser.y)) {
-        ichigo1.receiveDamage(1);
+    if(Math.floor(frames/60) > 40){
+        if ((ichigo1.x < laser.x + laser.width) &&
+            (ichigo1.x + ichigo1.width > laser.x) &&
+            (ichigo1.y < laser.y + laser.height) &&
+            (ichigo1.y + ichigo1.height > laser.y)) {
+            ichigo1.receiveDamage(1);
+            laser.x = canvas.width / 2;//se borra
         //poner sonido
+        }
     }
 }
 
