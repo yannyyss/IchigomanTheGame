@@ -6,6 +6,7 @@ var interval;
 var frames = 0; //la variable frames empieza en cero.
 var score = Math.floor(frames/60);
 var gudeTamas = []; //array de nuevos gudetamas. Empieza vacío.
+var nivel1 = true;
 
 var images = {
     ichigoRun1: '../IchigoGame/images/running2.png',
@@ -15,12 +16,15 @@ var images = {
     ichigoDown: '../IchigoGame/images/down.png',
     ichigoDownLeft: '../IchigoGame/images/downleft.PNG',
     ichigoDownRight: '../IchigoGame/images/downrigth.png',
-    startGame: '../IchigoGame/images/StartPortada.png',
-    gameOver: '../IchigoGame/images/gameover.png',
+    kick: '../IchigoGame/images/kick1.png',
     huevito: '../IchigoGame/images/huevito.png',
     gojira1: '../IchigoGame/images/gojira1.png',
     gojira2: '../IchigoGame/images/gojira2.png',
+    gojira3: '../IchigoGame/images/gojiradamage.png',
     laser: '../IchigoGame/images/laser.png',
+    startGame: '../IchigoGame/images/StartPortada.png',
+    gameOver: '../IchigoGame/images/gameover.png',
+    youWon: '../IchigoGame/images/WonPortada.png',
     bg: '../IchigoGame/images/Background.png' //Es el background del videojuego
 }
 
@@ -97,8 +101,8 @@ class IchigoMan {
         this.y = 200; //posición y del elemento en el canvas
         this.width = 190; //ancho del elemento
         this.height = 250; //alto del elemento
-        this.health = 40;
-        this.kicking = false;
+        this.health = 10;
+        //this.kicking = false;
         this.image = new Image(); /**/
         this.image.src = images.ichigoRun1; //ruta de la imagen que está en el objeto images
         this.image.onload = function () { //cuando se cargue la imagen:
@@ -140,7 +144,7 @@ class IchigoMan {
         this.x -= 50; //disminuye x, mueve a la izquierda
     }
     kick(){
-        this.image.src = images.kick;
+        this.image.src = images.kick; /**/ // Sólo cambia la imagen
 
     }
     draw() { 
@@ -184,7 +188,7 @@ class Gudetama {
         }
         //console.log(this.randomNumber);
     }
-
+    
     draw() {
         if(this.y < canvas.height-90){
             this.y += this.gravity; //suma el valor de la variable gravedad a y, de esta manera y incrementa cada vez que se dibuja.
@@ -200,41 +204,56 @@ class Gudetama {
 }
 
 class Gojira {
-    constructor(){
-        this.width = 300;
-        this.height = 300;
-        this.x = canvas.width + 1600;
-        this.y = canvas.height - 300;
-        this.switch = true;
-        this.imageHuevito = new Image();
-        this.imageHuevito.src = images.huevito;
-        this.image1 = new Image();
-        this.image1.src = images.gojira1;
-        this.image2 = new Image();
-        this.image2.src = images.gojira2;
-        this.drawable = this.imageHuevito;
-        //this.image.src = images.huevito;
-        this.drawable.onload = function() {
-          this.draw();
-        }.bind(this);
-    
+  constructor() {
+    this.width = 300;
+    this.height = 300;
+    this.health = 3;
+    this.x = canvas.width + 1600;
+    this.y = canvas.height - 300;
+    this.switch = true;
+    this.imageHuevito = new Image();
+    this.imageHuevito.src = images.huevito;
+    this.image1 = new Image();
+    this.image1.src = images.gojira1;
+    this.image2 = new Image();
+    this.image2.src = images.gojira2;
+    this.image3 = new Image();
+    this.image3.src = images.gojira3;
+    this.drawable = this.imageHuevito;
+    //this.image.src = images.huevito;
+    this.drawable.onload = function() {
+      this.draw();
+    }.bind(this);
+  }
+  receiveDamage(damage) {
+    //this.image.src = images.ichigoPunched;
+    this.health -= damage; //Borrar current gudetama
+      if (this.health > 0) {
+      console.log("Gojira received " + damage + " points of damage");
+      ctx.fillText("Gojira Lives " + gojira.health, this.x, this.y);
+      this.drawable = this.image3;
+      ctx.drawImage(this.drawable, this.x, this.y, this.width, this.height);
+    } else {
+      ctx.fillText("Gojira has died " + gojira.health, this.x, this.y);
+      console.log("Gojira has died");
     }
-
-    draw(){
-        if (this.x < canvas.width - 280) {
-            if(frames%10 === 0){
-                this.switch = !this.switch;
-                this.drawable = this.switch ? this.image1 : this.image2;
-            } 
-            approachingBoss.pause();
-            approachingBoss.currentTime = 0;
-            gojiraSong.play();
-            ctx.drawImage(this.drawable, this.x, this.y, this.width, this.height); //dibuja la imagen
-        } else {
-            this.x--;
-            ctx.drawImage(this.drawable, this.x, this.y, this.width, this.height);
-        }
+    return;
+  }
+  draw() {
+    if (this.x < canvas.width - 280) {
+      if (frames % 10 === 0) {
+        this.switch = !this.switch;
+        this.drawable = this.switch ? this.image1 : this.image2;
+      }
+      approachingBoss.pause();
+      approachingBoss.currentTime = 0;
+      gojiraSong.play();
+      ctx.drawImage(this.drawable, this.x, this.y, this.width, this.height); //dibuja la imagen
+    } else {
+      this.x--;
+      ctx.drawImage(this.drawable, this.x, this.y, this.width, this.height);
     }
+  }
 }
 
 class Laser {
@@ -280,7 +299,7 @@ class Vidas {
 
 var ichigo1 = new IchigoMan();/* */
 var vida = new Vidas();
-var go = new Gojira();
+var gojira = new Gojira();
 var laser = new Laser();
 var board = new Board(); /* */ //se crea una instancia para poder ejecutar las clases con sus constructores y funciones.
 //la instancia board se crea al final para que en la pantalla de inicio, cuando se pinta el canvas no se vean las demás imágenes.
@@ -293,7 +312,7 @@ function update() {
     ctx.clearRect(0, 0, canvas.width, canvas.height); //limpia el canvas
     board.draw(); //ejecuta la función draw, de la variable board, la cual contiene todo lo que está en la clase Board
     ichigo1.draw(); //ejecuta la función draw, de la variable ichigo1, la cual contiene todo lo que está en la clase IchigoMan
-    go.draw();
+    gojira.draw();
     vida.draw();
     laser.draw();
 
@@ -304,6 +323,7 @@ function update() {
         isTouchingGudetama(ichigo1, g);
     });
     isTouchingLaser(ichigo1,laser);
+    isTouchingGojira(ichigo1,gojira);
 }
 
 function inicio(){
@@ -311,8 +331,7 @@ function inicio(){
     board.iniciobg();
     addEventListener('keydown', function (e) {
         switch (e.keyCode) {
-            case 13:
-            //clearInterval(interval);
+            case 32:
                 start();
                 break;
 }});}
@@ -379,9 +398,21 @@ function isTouchingLaser(ichigo1,laser){
             (ichigo1.x + ichigo1.width > laser.x) &&
             (ichigo1.y < laser.y + laser.height) &&
             (ichigo1.y + ichigo1.height > laser.y)) {
-            ichigo1.receiveDamage(1);
-            laser.x = canvas.width / 2;//se borra
-        //poner sonido
+                ichigo1.receiveDamage(1);
+                laser.x = canvas.width / 2;//se borra
+                //poner sonido
+        }
+    }
+}
+
+function isTouchingGojira(ichigo1,gorija){
+    if (Math.floor(frames / 60) > 33) {
+        if ((gojira.x < ichigo1.x + ichigo1.width) &&
+            (gojira.x + gojira.width > ichigo1.x) &&
+            (gojira.y < ichigo1.y + ichigo1.height) &&
+            (gojira.y + gojira.height > ichigo1.y)) {
+                ichigo1.x = 100;
+                gojira.receiveDamage(1);
         }
     }
 }
@@ -398,15 +429,30 @@ function gameOver() {
     approachingBoss.currentTime = 0;
     gojiraSong.pause();
     gojiraSong.currentTime = 0;
+    nivel1 = false;
+    addEventListener('keydown', function (e) {
+        switch (e.keyCode) {
+            case 13:
+                restart();
+                break;
+        }
+    });
 }
 
 function restart() {
-    if (interval) return;
-    gudeTamas = [];
-    frames = 0;
-    ichigo1.x = 100;
-    ichigo1.y = 100;
-    inicio();
+
+    if(nivel1 === false){
+        inicio();
+        if (interval) return;
+        gorija.x = canvas.width + 1600;
+        gojira.image3.src = images.gojira3;
+        gojira.health = 3;
+        gudeTamas = [];
+        frames = 0;
+        ichigo1.x = 100;
+        ichigo1.y = 100;
+        ichigo1.health = 6;
+    }
 }
 
 //listeners
@@ -426,15 +472,15 @@ addEventListener('keydown', function (e) {
         case 40:
             ichigo1.moveDown();
             break;
-        case 27:
-            restart();
-            break;
-        case 32:
+        case 16:
             ichigo1.kick();
             break;
-        //case 13:
-            //start();
-            //break;
+        case 32:
+            start();
+            break;
+       // case 13:
+         //   restart();
+           // break;
     }
 });
 
