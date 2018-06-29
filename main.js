@@ -47,6 +47,9 @@ var gojiraSong = new Audio();
 gojiraSong.src = '../IchigoGame/sounds/Gojira.mp3';
 gojiraSong.loop = true;
 
+var itaiSound = new Audio();
+itaiSound.src = '../IchigoGame/sounds/itaisound.mp3';
+
 //class
 
 class Board { //Es el background del canvas
@@ -95,7 +98,7 @@ class IchigoMan {
         this.y = 200; //posición y del elemento en el canvas
         this.width = 190; //ancho del elemento
         this.height = 250; //alto del elemento
-        this.health = 5;
+        this.health = 4;
         this.kicking = false;
         this.image = new Image(); /**/
         this.image.src = images.ichigoRun1; //ruta de la imagen que está en el objeto images
@@ -355,6 +358,7 @@ function isTouchingGudetama(ichigo1,tama){
     (ichigo1.x + ichigo1.width > tama.x) &&
     (ichigo1.y < tama.y + tama.height) &&
     (ichigo1.y + ichigo1.height > tama.y)){
+        itaiSound.play();
         var i = gudeTamas.indexOf(tama);
         gudeTamas = gudeTamas.filter(function (tama, index) {
             return index !== i;
